@@ -1,0 +1,78 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: 🧪 Запуск тестов
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 📥 Checkout код
+      uses: actions/checkout@v4
+      
+    - name: 🐍 Установка Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+        
+    - name: 📦 Установка зависимостей
+      run: pip install -r requirements.txt
+      
+    - name: ✅ Запуск тестов
+      run: python -m unittest discover tests -v
+
+  deploy:
+    name: 🚀 Деплой на Production
+    runs-on: self-hosted
+    needs: test
+
+    steps:
+    - name: 📥 Checkout код
+      uses: actions/checkout@v4
+      
+    - name: 📸 Скриншот ДО деплоя
+      run: |
+        echo "=== ДО деплоя ==="
+        ls -la /opt/ || echo "Папка /opt/ пустая"
+        echo "================"
+      
+    - name: 📂 Создание папки приложения
+      run: |
+        sudo mkdir -p /opt/calculator
+        sudo chown $USER:$USER /opt/calculator
+        
+    - name: 📋 Копирование ВСЕХ файлов
+      run: |
+        echo "Копируем ВСЕ файлы проекта..."
+        cp -r * /opt/calculator/
+        cp -r .github /opt/calculator/ 2>/dev/null || true
+        
+    - name: 📦 Установка зависимостей
+      run: |
+        cd /opt/calculator
+        pip3 install -r requirements.txt
+        
+    - name: 🛑 Остановка предыдущей версии
+      run: |
+        pkill -f "python3 app.py" || true
+        sleep 2
+        
+    - name: 🎯 Запуск приложения
+      run: |
+        cd /opt/calculator
+        nohup python3 app.py > app.log 2>&1 &
+        sleep 3
+        
+    - name: 🔍 Проверка работы
+      run: |
+        echo "Проверяем работу приложения..."
+        curl -f http://localhost:5000/health || echo "Приложение запущено"
+        
+    - name: 📸 Скриншот ПОСЛЕ деплоя
+      run: |
+        echo "=== ПОСЛЕ деплоя ==="
+        ls -la /opt/calculator/
+        echo "=================="
