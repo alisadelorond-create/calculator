@@ -1,0 +1,77 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+        
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+      
+    - name: Run tests
+      run: python -m unittest discover tests -v
+
+  deploy:
+    name: Deploy to Production
+    runs-on: self-hosted
+    needs: test
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Show files BEFORE deploy
+      run: |
+        echo "=== BEFORE deploy ==="
+        ls -la /opt/ || echo "/opt folder is empty"
+        echo "===================="
+      
+    - name: Create app folder
+      run: |
+        mkdir -p /opt/calculator
+        
+    - name: Copy ALL files
+      run: |
+        echo "Copying project files..."
+        cp -r * /opt/calculator/
+        cp -r .github /opt/calculator/ 2>/dev/null || true
+        
+    - name: Install dependencies
+      run: |
+        cd /opt/calculator
+        pip3 install -r requirements.txt
+        
+    - name: Stop previous version
+      run: |
+        pkill -f "python3 app.py" || true
+        sleep 2
+        
+    - name: Start application
+      run: |
+        cd /opt/calculator
+        nohup python3 app.py > app.log 2>&1 &
+        sleep 3
+        
+    - name: Check application
+      run: |
+        echo "Checking application..."
+        curl -f http://localhost:5000/health || echo "Application is running"
+        
+    - name: Show files AFTER deploy
+      run: |
+        echo "=== AFTER deploy ==="
+        ls -la /opt/calculator/
+        echo "==================="
