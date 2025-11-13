@@ -26,11 +26,11 @@ jobs:
     - uses: actions/checkout@v4
     - run: |
         echo "Копируем файлы..."
-        mkdir -p /opt/mortgage-calculator
-        cp app.py calculator.py requirements.txt /opt/mortgage-calculator/
+        mkdir -p /home/sumaya/calculator
+        cp app.py calculator.py requirements.txt /home/sumaya/calculator/
     - run: |
         echo "Устанавливаем зависимости..."
-        cd /opt/mortgage-calculator
+        cd /home/sumaya/calculator
         pip3 install -r requirements.txt
     - run: |
         echo "Останавливаем предыдущую версию..."
@@ -38,8 +38,8 @@ jobs:
         sleep 2
     - run: |
         echo "Проверяем работу приложения..."
-        cd /opt/mortgage-calculator
+        cd /home/sumaya/calculator
         timeout 10s python3 app.py || echo "Приложение запущено для теста"
     - run: |
         echo "Деплой успешно завершен!"
-        ls -la /opt/mortgage-calculator/
+        ls -la /home/sumaya/calculator/
