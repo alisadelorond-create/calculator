@@ -6,73 +6,72 @@ on:
 
 jobs:
   test:
-    name: 🧪 Запуск тестов
+    name: Run Tests
     runs-on: ubuntu-latest
 
     steps:
-    - name: 📥 Checkout код
+    - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: 🐍 Установка Python
+    - name: Setup Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.12'
         
-    - name: 📦 Установка зависимостей
+    - name: Install dependencies
       run: pip install -r requirements.txt
       
-    - name: ✅ Запуск тестов
+    - name: Run tests
       run: python -m unittest discover tests -v
 
   deploy:
-    name: 🚀 Деплой на Production
+    name: Deploy to Production
     runs-on: self-hosted
     needs: test
 
     steps:
-    - name: 📥 Checkout код
+    - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: 📸 Скриншот ДО деплоя
+    - name: Show files BEFORE deploy
       run: |
-        echo "=== ДО деплоя ==="
-        ls -la /opt/ || echo "Папка /opt/ пустая"
-        echo "================"
+        echo "=== BEFORE deploy ==="
+        ls -la /opt/ || echo "/opt folder is empty"
+        echo "===================="
       
-    - name: 📂 Создание папки приложения
+    - name: Create app folder
       run: |
-        sudo mkdir -p /opt/calculator
-        sudo chown $USER:$USER /opt/calculator
+        mkdir -p /opt/calculator
         
-    - name: 📋 Копирование ВСЕХ файлов
+    - name: Copy ALL files
       run: |
-        echo "Копируем ВСЕ файлы проекта..."
+        echo "Copying project files..."
         cp -r * /opt/calculator/
         cp -r .github /opt/calculator/ 2>/dev/null || true
         
-    - name: 📦 Установка зависимостей
+    - name: Install dependencies
       run: |
         cd /opt/calculator
         pip3 install -r requirements.txt
         
-    - name: 🛑 Остановка предыдущей версии
+    - name: Stop previous version
       run: |
         pkill -f "python3 app.py" || true
         sleep 2
         
-    - name: 🎯 Запуск приложения
+    - name: Start application
       run: |
         cd /opt/calculator
         nohup python3 app.py > app.log 2>&1 &
         sleep 3
         
-    - name: 🔍 Проверка работы
+    - name: Check application
       run: |
-        echo "Проверяем работу приложения..."
-        curl -f http://localhost:5000/health || echo "Приложение запущено"
+        echo "Checking application..."
+        curl -f http://localhost:5000/health || echo "Application is running"
         
-    - name: 📸 Скриншот ПОСЛЕ деплоя
+    - name: Show files AFTER deploy
       run: |
-        echo "=== ПОСЛЕ деплоя ==="
+        echo "=== AFTER deploy ==="
         ls -la /opt/calculator/
-        echo "=================="
+        echo "==================="
