@@ -29,9 +29,13 @@ jobs:
         mkdir -p /home/sumaya/calculator
         cp -r . /home/sumaya/calculator/
     - run: |
-        echo "Устанавливаем зависимости..."
+        echo "Устанавливаем pip..."
+        sudo apt update
+        sudo apt install -y python3-pip
+    - run: |
+        echo "Устанавливаем Flask..."
         cd /home/sumaya/calculator
-        pip3 install -r requirements.txt
+        pip3 install flask
     - run: |
         echo "Останавливаем предыдущую версию..."
         pkill -f "python3 app.py" || true
