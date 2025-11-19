@@ -27,7 +27,7 @@ jobs:
     - run: |
         echo "Копируем файлы..."
         mkdir -p /home/sumaya/calculator
-        cp app.py calculator.py requirements.txt /home/sumaya/calculator/
+        cp app.py calculator.py requirements.tt /home/sumaya/calculator/
     - run: |
         echo "Устанавливаем зависимости..."
         cd /home/sumaya/calculator
