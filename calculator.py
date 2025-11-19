@@ -10,7 +10,7 @@ class SimpleCalculator:
     
     def divide(self, a, b):
         if b == 0:
-            raise ValueError("На ноль делить нельзя!")
+            raise ValueError("На ноль делить нельзя")
         return a / b
     
     def power(self, a, b):
